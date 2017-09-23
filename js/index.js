@@ -3,9 +3,11 @@
 const puppetTemplate = document.querySelector('#puppetTemplate');
 const puppets = document.querySelector('#puppets');
 
-const labelTextbox     = document.querySelector('#label');
-const webhookTextbox   = document.querySelector('#webhook');
-const addButton        = document.querySelector('#add');
+const labelTextbox      = document.querySelector('#label');
+const webhookTextbox    = document.querySelector('#webhook');
+const addButton         = document.querySelector('#add');
+
+const introduction      = document.querySelector('#introduction');
 
 const url = new URL(window.location)
 
@@ -20,12 +22,15 @@ const actors = Qs.parse(qs).actors || [
 /*
     {
         label: 'Antagonist',
-        webhook: 'https://discordapp.com/api/webhooks/ect',
+        webhook: 'https://discordapp.com/api/webhooks/blahblahblah_ect',
     },
 */
 ]
 
-console.log(actors)
+if(actors.length)
+{
+    introduction.style.display = "none"
+}
 
 function supportsTemplate() {
   return 'content' in document.createElement('template')
@@ -34,33 +39,59 @@ function supportsTemplate() {
 if(supportsTemplate())
 {
     actors.forEach(function(elm, i, arr) {
-        puppetTemplate.content.querySelector('h3').textContent = elm.label
-        
         const clone = document.importNode(puppetTemplate.content, true)
+        
+        const label = clone.querySelector('.label')
+        const name = clone.querySelector('small.name')
         const textarea = clone.querySelector('textarea')
         const button = clone.querySelector('button')
+        const img = clone.querySelector('img')
         
-        button.addEventListener('click', function() {
-            button.disabled = true
+        label.textContent = elm.label
+        
+        button.disabled = true
+        
+        window.fetch(elm.webhook, {
+            method: 'GET',
+            mode: 'cors',
+            cache: 'default',
+            redirect: 'follow',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        }).then(function(response) {
+            return response.json()
+        }, function(err) {
+            console.log(err)
+            textarea.textContent = "WebHook was not responding properly"
+            textarea.disabled = true
+        }).then(function(webhook) {
+            name.textContent = webhook.name
+            img.src = 'https://cdn.discordapp.com/avatars/'+webhook.id+'/'+webhook.avatar+'.png?size=128'
             
-            window.fetch(elm.webhook, {
-                method: 'POST',
-                mode: 'cors',
-                cache: 'default',
-                redirect: 'follow',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    content: textarea.value,
+            button.disabled = false
+            button.addEventListener('click', function() {
+                button.disabled = true
+                
+                window.fetch(elm.webhook, {
+                    method: 'POST',
+                    mode: 'cors',
+                    cache: 'default',
+                    redirect: 'follow',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        content: textarea.value,
+                    })
+                }).then(function(response) {
+                    button.disabled = false
+                }, function(err) {
+                    button.disabled = false
                 })
-            }).then(function(response) {
-                button.disabled = false
-            }, function(err) {
-                button.disabled = false
             })
-            
         })
+        
         puppets.appendChild(clone);
     })
 }
@@ -70,14 +101,10 @@ else
 }
 
 addButton.addEventListener('click', function() {
-    addButton.disabled = true
-    
     actors.push({
         'label': labelTextbox.value,
         'webhook': webhookTextbox.value,
     })
-    
-    
     window.location = url.origin + url.pathname + '?' + Qs.stringify({'actors':actors})
 })
 

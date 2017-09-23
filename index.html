@@ -23,21 +23,27 @@
         <p id="puppets">
             <template id="puppetTemplate">
                 <div>
-                    <h3></h3>
+                    <div>
+                        <img class="avatar">
+                        <h3 class="label"></h3> <small class="name"></small>
+                    </div>
                     <textarea></textarea>
                     <button>Submit</button>
+                    <p class="errors"></p>
                 </div>
             </template>
         </p>
         
         <p>
-            <div>
-                Label
-                <input id="label" type="text"></input>
-                Webhook
-                <input id="webhook" type="text"></input>
-                <button id="add">Add</button>
-            </div>
+            Label
+            <input id="label" type="text">
+            Webhook
+            <input id="webhook" type="text">
+            <button id="add">Add</button>
+        </p>
+        
+        <p id="introduction">
+            Discord WebHooks allow you to have human controlled bots in your server. Have them entertain your patron or create drama. Create a webhook, give it a suitable name and profile picture and paste it into above form to start puppeteering them.
         </p>
         
         <script src="js/index.js"></script>

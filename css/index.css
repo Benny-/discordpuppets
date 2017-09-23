@@ -1,0 +1,10 @@
+
+.label {
+    display: inline-block;
+}
+
+img.avatar {
+    width: 2em;
+    height: 2em;
+}
+
