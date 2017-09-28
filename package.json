@@ -1,0 +1,23 @@
+{
+  "name": "discordpuppets",
+  "version": "1.0.0",
+  "description": "Control discord webhook puppet bots",
+  "scripts": {
+    "build": "webpack -p",
+    "dev": "webpack-dev-server --hot --inline"
+  },
+  "repository": "https://github.com/Benny-/discordpuppets.git",
+  "author": "Benny Jacobs <Benny@gmx.it>",
+  "license": "BSD-3-Clause",
+  "private": false,
+  "dependencies": {
+    "qs": "^6.5.1"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-es2015": "^6.24.1",
+    "webpack": "^3.6.0",
+    "webpack-dev-server": "^2.8.2"
+  }
+}
