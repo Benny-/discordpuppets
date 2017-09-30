@@ -2,23 +2,10 @@
 body {
     margin: 0;
     background-color: #36393F;
-    color: #B7B8BB;
 }
 
 template {
     display: none;
-}
-
-a {
-    color: #abcde1
-}
-
-a.visited, a.hover {
-    color: #1abcde;
-}
-
-a.special {
-    color:#123456;
 }
 
 header {
@@ -36,11 +23,12 @@ header > * > img {
 
 div.selfContainedBlock {
     border-radius: 1em;
-    background-color: #2F3237;
+    background-color: #FAFAFB;
     margin: 0.25em;
     padding: 1em;
     border: #202225;
     border-style: solid;
+    text-align:center;
 }
 
 p.errors {
