@@ -1,10 +1,59 @@
 
+body {
+    margin: 0;
+    background-color: #36393F;
+    color: #B7B8BB;
+}
+
+a { color: #abcde1}
+a.visited, a.hover {color: #1abcde;}
+a.special {color:#123456;}
+
+header {
+    background-color: #2F3136;
+    border-bottom: solid;
+    border-bottom-color: black;
+    border-bottom-width: 1px;
+}
+
+header > * > img {
+    width: 1.5em;
+    height: 1.5em;
+    margin: 0.2em;
+}
+
+div.selfContainedBlock {
+    border-radius: 1em;
+    background-color: #2F3237;
+    margin: 0.25em;
+    padding: 1em;
+    border: #202225;
+    border-style: solid;
+}
+
+p.errors {
+    color: red;
+}
+
 .label {
     display: inline-block;
 }
 
 img.avatar {
-    width: 2em;
-    height: 2em;
+    width: 4em;
+    height: 4em;
+    border: solid;
+    border-color: black;
+    border-width: 1px;
 }
+
+textarea {
+    width: 100%;
+}
+
+figure > img {
+    border: #202225;
+    border-style: dotted;
+}
+
 

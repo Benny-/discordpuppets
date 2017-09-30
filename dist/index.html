@@ -19,31 +19,71 @@
             instructions how to enable JavaScript in your web browser</a>.
         </noscript>
         
-        <p id="puppets">
-            <template id="puppetTemplate">
-                <div>
+        <header>
+            <a href="/">
+                <img src="images/robocord.png" width="64" height="64">
+            </a>
+        </header>
+        
+        <template id="puppetTemplate">
+            <div class="selfContainedBlock">
+                <form>
                     <div>
                         <img class="avatar">
                         <h3 class="label"></h3> <small class="name"></small>
                     </div>
-                    <textarea></textarea>
-                    <button>Submit</button>
+                    <textarea rows="6"></textarea>
+                    <button type="button" class="say">Say it</button>
+                    <button type="button" class="remove">Remove</button>
                     <p class="errors"></p>
-                </div>
-            </template>
-        </p>
+                </form>
+            </div>
+        </template>
         
-        <p>
-            Label
-            <input id="label" type="text">
-            Webhook
-            <input id="webhook" type="text">
-            <button id="add">Add</button>
-        </p>
+        <div class="selfContainedBlock">
+            <p>
+                Add new WebHook bot.
+            <p>
+            <form>
+                Label:
+                <input name="label" id="label" placeholder="(optional)" type="text">
+                WebHook:
+                <input name="webhook" id="webhook" placeholder="https://..." type="text">
+                <button type="button" id="add">Add</button>
+            </form>
+        </div>
         
-        <p id="introduction">
-            Discord WebHooks allow you to have human controlled bots in your server. Have them entertain your patron or create drama. Create a webhook, give it a suitable name and profile picture and paste it into above form to start puppeteering them. The Label field can be anything you'd like and WebHooks field should contain a valid discord WebHook url.
-        </p>
+        <div id="introduction" class="selfContainedBlock">
+            <p>
+                Discord WebHooks allow you to have human controlled bots in your server.
+            </p>
+            <p>
+                Have remote controlled bots entertain your patron and interact with them. Get started with just 3 simple steps. Make sure you have the rights on the server to add WebHooks.
+            </p>
+            
+            <figure>
+                <img src="images/webhooks.png" alt="Adding WebHook bots" width="821" heigh="680">
+                <figcaption>1. Add WebHook bots. Give them a suitable profile picture and name.</figcaption>
+            </figure>
+            
+            <figure>
+                <img src="images/adding.png" alt="Add WebHook bots" width="711" heigh="425">
+                <figcaption>2. Copy the WebHook link and paste it at the top of this page to start chatting.</figcaption>
+            </figure>
+            
+            <figure>
+                <img src="images/act.png" alt="See the WebHook bots in action" width="647" heigh="570">
+                <figcaption>3. See the WebHook bots in action.</figcaption>
+            </figure>
+            
+            <p>
+                All <a href="https://support.discordapp.com/hc/en-us/articles/210298617-Markdown-Text-101-Chat-Formatting-Bold-Italic-Underline-">discord markdown</a> is supported from WebHook bots.
+            </p>
+            
+            <small>
+                Bugs and features can be <a href="https://github.com/Benny-/discordpuppets/issues">reported on github</a>. This website has no relation with <a href="https://discordapp.com/">discordapp.com</a>.
+            </small>
+        </div>
         
         <script src="bundle.js"></script>
     </body>

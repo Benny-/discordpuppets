@@ -35,7 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import Qs from 'qs'
 
 const puppetTemplate = document.querySelector('#puppetTemplate')
-const puppets = document.querySelector('#puppets')
+const body = document.querySelector('body')
 
 const labelTextbox      = document.querySelector('#label')
 const webhookTextbox    = document.querySelector('#webhook')
@@ -72,20 +72,22 @@ function supportsTemplate() {
 
 if(supportsTemplate())
 {
-    actors.forEach(function(elm, i, arr) {
+    actors.forEach(function(actor, i, arr) {
         const clone = document.importNode(puppetTemplate.content, true)
         
+        const img = clone.querySelector('img')
         const label = clone.querySelector('.label')
         const name = clone.querySelector('small.name')
         const textarea = clone.querySelector('textarea')
-        const button = clone.querySelector('button')
-        const img = clone.querySelector('img')
+        const sayButton = clone.querySelector('button.say')
+        const removeButton = clone.querySelector('button.remove')
+        const errorsSection = clone.querySelector('p.errors')
         
-        label.textContent = elm.label
+        label.textContent = actor.label
         
-        button.disabled = true
+        sayButton.disabled = true
         
-        window.fetch(elm.webhook, {
+        window.fetch(actor.webhook, {
             method: 'GET',
             mode: 'cors',
             cache: 'default',
@@ -94,20 +96,23 @@ if(supportsTemplate())
                 'Content-Type': 'application/json'
             },
         }).then(function(response) {
-            return response.json()
-        }, function(err) {
-            console.log(err)
-            textarea.textContent = "WebHook was not responding properly"
-            textarea.disabled = true
+            if(response.status >= 200 && response.status < 300)
+            {
+                return response.json()
+            }
+            else
+            {
+                return Promise.reject("Invalid WebHook: Server returned a error code")
+            }
         }).then(function(webhook) {
             name.textContent = webhook.name
             img.src = 'https://cdn.discordapp.com/avatars/'+webhook.id+'/'+webhook.avatar+'.png?size=128'
             
-            button.disabled = false
-            button.addEventListener('click', function() {
-                button.disabled = true
+            sayButton.disabled = false
+            sayButton.addEventListener('click', function() {
+                sayButton.disabled = true
                 
-                window.fetch(elm.webhook, {
+                window.fetch(actor.webhook, {
                     method: 'POST',
                     mode: 'cors',
                     cache: 'default',
@@ -119,27 +124,70 @@ if(supportsTemplate())
                         content: textarea.value,
                     })
                 }).then(function(response) {
-                    button.disabled = false
+                    if(response.status >= 200 && response.status < 300)
+                    {
+                        sayButton.disabled = false
+                    }
+                    else
+                    {
+                        errorsSection.textContent = "WebHook request was not properly handeled. The WebHook might have been removed from admin panel. Try Refreshing page."
+                    }
                 }, function(err) {
-                    button.disabled = false
+                    sayButton.disabled = false
                 })
             })
+        }).catch(function(err) {
+            console.log(err)
+            img.src = 'images/errorcord.png'
+            errorsSection.textContent = "WebHook was not responding properly. It might have been removed from admin panel."
+            textarea.disabled = true
         })
         
-        puppets.appendChild(clone);
+        removeButton.addEventListener('click', function() {
+            actors.splice(actors.findIndex(function(elm) {
+                return elm === actor
+            }), 1)
+            console.log(actors)
+            window.location = url.origin + url.pathname + '?' + Qs.stringify({'actors':actors})
+        })
+        
+        body.appendChild(clone);
     })
 }
 else
 {
     console.log("Templates unsupported. I'm not sure what to do >_<")
+    alert("Unsupported browser. Please open a ticket at https://github.com/Benny-/discordpuppets/issues")
 }
 
 addButton.addEventListener('click', function() {
-    actors.push({
-        'label': labelTextbox.value,
-        'webhook': webhookTextbox.value,
+    addButton.disabled = true
+    window.fetch(webhookTextbox.value, {
+        method: 'GET',
+        mode: 'cors',
+        cache: 'default',
+        redirect: 'follow',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    }).then(function(response) {
+        if(response.status >= 200 && response.status < 300)
+        {
+            actors.push({
+                'label': labelTextbox.value,
+                'webhook': webhookTextbox.value,
+            })
+            window.location = url.origin + url.pathname + '?' + Qs.stringify({'actors':actors})
+        }
+        else
+        {
+            return Promise.reject("Invalid WebHook: Server returned a error code")
+        }
+        
+    }).catch(function(err) {
+        alert(err)
+        addButton.disabled = false
     })
-    window.location = url.origin + url.pathname + '?' + Qs.stringify({'actors':actors})
 })
 
 
