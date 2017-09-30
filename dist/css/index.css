@@ -5,9 +5,21 @@ body {
     color: #B7B8BB;
 }
 
-a { color: #abcde1}
-a.visited, a.hover {color: #1abcde;}
-a.special {color:#123456;}
+template {
+    display: none;
+}
+
+a {
+    color: #abcde1
+}
+
+a.visited, a.hover {
+    color: #1abcde;
+}
+
+a.special {
+    color:#123456;
+}
 
 header {
     background-color: #2F3136;

@@ -33,6 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 'use strict';
 
 import Qs from 'qs'
+import fetch from 'whatwg-fetch'
 
 const puppetTemplate = document.querySelector('#puppetTemplate')
 const body = document.querySelector('body')
@@ -44,6 +45,20 @@ const addButton         = document.querySelector('#add')
 const introduction      = document.querySelector('#introduction')
 
 const url = new URL(window.location)
+
+const checkStatus = function(response) {
+    if (response.status >= 200 && response.status < 300) {
+        return response
+    } else {
+        var error = new Error(response.statusText)
+        error.response = response
+        throw error
+    }
+}
+
+const parseJSON = function(response) {
+  return response.json()
+}
 
 let qs = url.search
 
@@ -66,99 +81,90 @@ if(actors.length)
     introduction.style.display = "none"
 }
 
-function supportsTemplate() {
-  return 'content' in document.createElement('template')
+const templateContent = function(template) {
+    if("content" in document.createElement("template")) {
+        return document.importNode(template.content, true);
+    } else {
+        var fragment = document.createDocumentFragment();
+        var children = template.childNodes;
+        for (i = 0; i < children.length; i++) {
+            fragment.appendChild(children[i].cloneNode(true));
+        }
+        return fragment;
+    }
 }
 
-if(supportsTemplate())
-{
-    actors.forEach(function(actor, i, arr) {
-        const clone = document.importNode(puppetTemplate.content, true)
+actors.forEach(function(actor, i, arr) {
+    const clone = templateContent(puppetTemplate)
+    
+    const img = clone.querySelector('img')
+    const label = clone.querySelector('.label')
+    const name = clone.querySelector('small.name')
+    const textarea = clone.querySelector('textarea')
+    const sayButton = clone.querySelector('button.say')
+    const removeButton = clone.querySelector('button.remove')
+    const errorsSection = clone.querySelector('p.errors')
+    
+    label.textContent = actor.label
+    
+    sayButton.disabled = true
+    
+    window.fetch(actor.webhook, {
+        method: 'GET',
+        mode: 'cors',
+        cache: 'default',
+        redirect: 'follow',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+    })
+    .then(checkStatus)
+    .then(parseJSON)
+    .then(function(webhook) {
+        name.textContent = webhook.name
+        img.src = 'https://cdn.discordapp.com/avatars/'+webhook.id+'/'+webhook.avatar+'.png?size=128'
         
-        const img = clone.querySelector('img')
-        const label = clone.querySelector('.label')
-        const name = clone.querySelector('small.name')
-        const textarea = clone.querySelector('textarea')
-        const sayButton = clone.querySelector('button.say')
-        const removeButton = clone.querySelector('button.remove')
-        const errorsSection = clone.querySelector('p.errors')
-        
-        label.textContent = actor.label
-        
-        sayButton.disabled = true
-        
-        window.fetch(actor.webhook, {
-            method: 'GET',
-            mode: 'cors',
-            cache: 'default',
-            redirect: 'follow',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        }).then(function(response) {
-            if(response.status >= 200 && response.status < 300)
-            {
-                return response.json()
-            }
-            else
-            {
-                return Promise.reject("Invalid WebHook: Server returned a error code")
-            }
-        }).then(function(webhook) {
-            name.textContent = webhook.name
-            img.src = 'https://cdn.discordapp.com/avatars/'+webhook.id+'/'+webhook.avatar+'.png?size=128'
+        sayButton.disabled = false
+        sayButton.addEventListener('click', function() {
+            sayButton.disabled = true
             
-            sayButton.disabled = false
-            sayButton.addEventListener('click', function() {
-                sayButton.disabled = true
-                
-                window.fetch(actor.webhook, {
-                    method: 'POST',
-                    mode: 'cors',
-                    cache: 'default',
-                    redirect: 'follow',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        content: textarea.value,
-                    })
-                }).then(function(response) {
-                    if(response.status >= 200 && response.status < 300)
-                    {
-                        sayButton.disabled = false
-                    }
-                    else
-                    {
-                        errorsSection.textContent = "WebHook request was not properly handeled. The WebHook might have been removed from admin panel. Try Refreshing page."
-                    }
-                }, function(err) {
-                    sayButton.disabled = false
+            window.fetch(actor.webhook, {
+                method: 'POST',
+                mode: 'cors',
+                cache: 'default',
+                redirect: 'follow',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    content: textarea.value,
                 })
             })
-        }).catch(function(err) {
-            console.log(err)
-            img.src = 'images/errorcord.png'
-            errorsSection.textContent = "WebHook was not responding properly. It might have been removed from admin panel."
-            textarea.disabled = true
+            .then(checkStatus)
+            .then(function(response) {
+                sayButton.disabled = false
+            }).catch(function(err) {
+                console.log(err)
+                errorsSection.textContent = "WebHook request was not properly handeled. The WebHook might have been removed from admin panel. Try Refreshing page."
+            })
         })
-        
-        removeButton.addEventListener('click', function() {
-            actors.splice(actors.findIndex(function(elm) {
-                return elm === actor
-            }), 1)
-            console.log(actors)
-            window.location = url.origin + url.pathname + '?' + Qs.stringify({'actors':actors})
-        })
-        
-        body.appendChild(clone);
+    }).catch(function(err) {
+        console.log(err)
+        img.src = 'images/errorcord.png'
+        errorsSection.textContent = "WebHook was not responding properly. It might have been removed from admin panel."
+        textarea.disabled = true
     })
-}
-else
-{
-    console.log("Templates unsupported. I'm not sure what to do >_<")
-    alert("Unsupported browser. Please open a ticket at https://github.com/Benny-/discordpuppets/issues")
-}
+    
+    removeButton.addEventListener('click', function() {
+        actors.splice(actors.findIndex(function(elm) {
+            return elm === actor
+        }), 1)
+        console.log(actors)
+        window.location = url.origin + url.pathname + '?' + Qs.stringify({'actors':actors})
+    })
+    
+    body.appendChild(clone)
+})
 
 addButton.addEventListener('click', function() {
     addButton.disabled = true
