@@ -104,6 +104,7 @@ actors.forEach(function(actor, i, arr) {
     const sayButton = clone.querySelector('button.say')
     const removeButton = clone.querySelector('button.remove')
     const errorsSection = clone.querySelector('p.errors')
+    const fileInput = clone.querySelector('input[type="file"]')
     
     label.textContent = actor.label
     
@@ -128,17 +129,16 @@ actors.forEach(function(actor, i, arr) {
         sayButton.addEventListener('click', function() {
             sayButton.disabled = true
             
+            const data = new FormData()
+            data.append('content', textarea.value)
+            data.append('file', fileInput.files[0])
+            
             window.fetch(actor.webhook, {
                 method: 'POST',
                 mode: 'cors',
                 cache: 'default',
                 redirect: 'follow',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    content: textarea.value,
-                })
+                body: data
             })
             .then(checkStatus)
             .then(function(response) {
